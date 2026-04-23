@@ -48,3 +48,14 @@ cd /work/third_party
 wget https://download.sourceforge.net/libpng/libpng-1.2.56.tar.gz
 tar xf libpng-1.2.56.tar.gz
 ```
+
+
+## CRC Patch
+
+We use the AFL++ CRC-removal patch for libpng 1.2.56.
+
+To apply the CRC patch:
+
+```bash
+make patch-libpng
+```
