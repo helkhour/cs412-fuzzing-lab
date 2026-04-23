@@ -59,3 +59,12 @@ To apply the CRC patch:
 ```bash
 make patch-libpng
 ```
+
+## Instrumented libpng build
+
+We compile **libpng 1.2.56** with **AFL++ instrumentation** and **AddressSanitizer (ASan)**.
+
+To build the instrumented static library:
+
+```bash
+make build-libpng
