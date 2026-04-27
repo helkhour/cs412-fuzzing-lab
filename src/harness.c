@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     if (!fp) return 0;
 
     // Libpng decoder object which holds all of libpng's internal state.
-    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL NULL, NULL);
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     // If creation failed, cloe the file and exit.
     if (!png) {
         fclose(fp);
