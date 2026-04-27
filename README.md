@@ -2,6 +2,7 @@
 ---
 
 ## Project Structure
+```text
 team4-cs412-fuzzing-libpng/
 ├── Dockerfile
 ├── Makefile
@@ -14,6 +15,7 @@ team4-cs412-fuzzing-libpng/
 ├── build/ # (later) instrumented build
 ├── build-qemu/ # (later) vanilla build
 
+```
 
 ---
 
@@ -68,3 +70,15 @@ To build the instrumented static library:
 
 ```bash
 make build-libpng
+```
+
+
+## Harness Build
+
+We compile the fuzzing harness against the instrumented static libpng.
+
+To build the harness:
+
+```bash
+make build-harness
+```
