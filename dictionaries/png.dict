@@ -1,0 +1,11 @@
+header_png="\x89PNG\x0d\x0a\x1a\x0a"
+
+section_IHDR="IHDR"
+section_PLTE="PLTE"
+section_IDAT="IDAT"
+section_IEND="IEND"
+section_gAMA="gAMA"
+
+section_tEXt="tEXt"
+section_zTXt="zTXt"
+section_iTXt="iTXt"
