@@ -8,6 +8,8 @@ DICT=dictionaries/png.dict
 FINDINGS=findings
 PLOT_OUTPUT=plot_output
 
+.PHONY: build-docker patch-libpng build-libpng build-harness build fuzz plot clean
+
 build-docker:
 	docker build -t $(IMAGE) .
 
@@ -42,21 +44,9 @@ build: build-docker patch-libpng build-libpng build-harness
 
 fuzz:
 	docker run --rm -it -v "$$(pwd)":/work $(IMAGE) bash -lc '\
-		AFL_SKIP_CPUFREQ=1 AFL_AUTORESUME=1 \
 		afl-fuzz -i /work/$(SEEDS) \
 		-o /work/$(FINDINGS) \
 		-x /work/$(DICT) \
 		-- /work/$(HARNESS) @@'
-
-plot:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
-		afl-plot /work/$(FINDINGS)/default /work/$(PLOT_OUTPUT)'
-
-clean:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
-		rm -rf /work/build /work/findings /work/plot_output && \
-		rm -f /work/$(HARNESS) && \
-		rm -f /work/third_party/libpng-1.2.56/*.orig && \
-		rm -f /work/third_party/libpng-1.2.56/*.rej'
 
 
