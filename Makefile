@@ -61,4 +61,4 @@ unpatch-bug:
 		cd /work/$(LIBPNG_DIR) && \
 		patch --reverse -p0 < /work/$(PATCH_SYNTHETIC) || true'
 
-build-bug: build-docker patch-bug build-libpng build-harness
+build-bug: build-docker patch-libpng patch-bug build-libpng build-harness
