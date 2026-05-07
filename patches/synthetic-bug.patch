@@ -1,0 +1,19 @@
+--- pngread.c.orig	2026-05-06 16:42:33.641075948 +0200
++++ pngread.c	2026-05-06 16:50:24.545917473 +0200
+@@ -440,6 +440,16 @@
+       png_uint_32 length = png_read_chunk_header(png_ptr);
+       PNG_CONST png_bytep chunk_name = png_ptr->chunk_name;
+ 
++      /* Synthetic bug for Q5: off-by-one heap write in libpng png_read_info(). */
++      if (chunk_name[0] == 'I' &&
++          chunk_name[1] == 'H' &&
++          chunk_name[2] == 'D' &&
++          chunk_name[3] == 'S')
++      {
++         char small[16];
++         small[16] = 'A';  /* off-by-one write */
++      }
++
+       /* This should be a binary subdivision search or a hash for
+        * matching the chunk name rather than a linear search.
+        */

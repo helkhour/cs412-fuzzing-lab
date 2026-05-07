@@ -8,6 +8,8 @@ DICT=dictionaries/png.dict
 FINDINGS=findings
 PLOT_OUTPUT=plot_output
 
+PATCH_SYNTHETIC=patches/synthetic-bug.patch
+
 .PHONY: build-docker patch-libpng build-libpng build-harness build fuzz plot clean
 
 build-docker:
@@ -49,4 +51,14 @@ fuzz:
 		-x /work/$(DICT) \
 		-- /work/$(HARNESS) @@'
 
+patch-bug:
+	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		cd /work/$(LIBPNG_DIR) && \
+		patch --forward -p0 < /work/$(PATCH_SYNTHETIC) || true'
 
+unpatch-bug:
+	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		cd /work/$(LIBPNG_DIR) && \
+		patch --reverse -p0 < /work/$(PATCH_SYNTHETIC) || true'
+
+build-bug: build-docker patch-bug build-libpng build-harness
