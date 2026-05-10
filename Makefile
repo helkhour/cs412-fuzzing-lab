@@ -10,7 +10,7 @@ PLOT_OUTPUT=plot_output
 
 PATCH_SYNTHETIC=patches/synthetic-bug.patch
 
-.PHONY: build-docker patch-libpng build-libpng build-harness build fuzz plot clean
+.PHONY: build-docker patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu fuzz-qemu plot-qemu
 
 build-docker:
 	docker build -t $(IMAGE) .
@@ -66,6 +66,8 @@ build-bug: build-docker patch-libpng patch-bug build-libpng build-harness
 
 # For QEMU mode, we need a copy of the libng compiled with standard complier (gcc) or plain clang, without asan or afl 
 VANILLA_INSTALL=build-qemu/install
+HARNESS_QEMU=png_fuzz_qemu
+FINDINGS_QEMU=findings-qemu
 
 build-libpng-vanilla:
 	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
@@ -75,8 +77,7 @@ build-libpng-vanilla:
 		./configure --disable-shared --prefix=/work/$(VANILLA_INSTALL) && \
 		make -j$$(nproc) && \
 		make install'
-#h arness compiled against vanilla library 
-HARNESS_QEMU=png_fuzz_qemu
+
 
 build-harness-qemu:
 	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
@@ -87,8 +88,7 @@ build-harness-qemu:
 		-g -O1 \
 		-o /work/$(HARNESS_QEMU)'
 
-# QEMU mode fuzzing 
-FINDINGS_QEMU=findings-qemu
+setup-qemu: build-docker patch-libpng build-libpng-vanilla build-harness-qemu
 
 fuzz-qemu:
 	docker run --rm -it -v "$$(pwd)":/work $(IMAGE) bash -lc '\
@@ -97,3 +97,10 @@ fuzz-qemu:
 		-o /work/$(FINDINGS_QEMU) \
 		-x /work/$(DICT) \
 		-- /work/$(HARNESS_QEMU) @@'
+	
+plot-qemu:
+	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		afl-plot /work/$(FINDINGS_QEMU)/default/ /work/plot_output_qemu/'
+
+clean:
+	rm -rf build build-qemu $(HARNESS) $(HARNESS_QEMU) $(FINDINGS) $(FINDINGS_QEMU) plot_output plot_output_qemu
