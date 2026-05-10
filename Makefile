@@ -62,3 +62,38 @@ unpatch-bug:
 		patch --reverse -p0 < /work/$(PATCH_SYNTHETIC) || true'
 
 build-bug: build-docker patch-libpng patch-bug build-libpng build-harness
+
+
+# For QEMU mode, we need a copy of the libng compiled with standard complier (gcc) or plain clang, without asan or afl 
+VANILLA_INSTALL=build-qemu/install
+
+build-libpng-vanilla:
+	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		cd /work/$(LIBPNG_DIR) && \
+		make distclean || true && \
+		CC=gcc CFLAGS="-g -O1" \
+		./configure --disable-shared --prefix=/work/$(VANILLA_INSTALL) && \
+		make -j$$(nproc) && \
+		make install'
+#h arness compiled against vanilla library 
+HARNESS_QEMU=png_fuzz_qemu
+
+build-harness-qemu:
+	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		gcc /work/src/harness.c \
+		-I/work/$(VANILLA_INSTALL)/include \
+		-L/work/$(VANILLA_INSTALL)/lib \
+		-lpng12 -lz -lm \
+		-g -O1 \
+		-o /work/$(HARNESS_QEMU)'
+
+# QEMU mode fuzzing 
+FINDINGS_QEMU=findings-qemu
+
+fuzz-qemu:
+	docker run --rm -it -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+		afl-fuzz -Q \
+		-i /work/$(SEEDS) \
+		-o /work/$(FINDINGS_QEMU) \
+		-x /work/$(DICT) \
+		-- /work/$(HARNESS_QEMU) @@'
