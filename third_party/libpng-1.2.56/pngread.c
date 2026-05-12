@@ -440,6 +440,17 @@ png_read_info(png_structp png_ptr, png_infop info_ptr)
       png_uint_32 length = png_read_chunk_header(png_ptr);
       PNG_CONST png_bytep chunk_name = png_ptr->chunk_name;
 
+      /* Synthetic bug for Q5: off-by-one heap write in libpng png_read_info(). */
+      if (chunk_name[0] == 'I' &&
+          chunk_name[1] == 'H' &&
+          chunk_name[2] == 'D' &&
+          chunk_name[3] == 'S')
+      {
+         png_bytep small = (png_bytep)png_malloc(png_ptr, 4);
+         small[4] = 0x41;  /* off-by-one write */
+         png_free(png_ptr, small);
+      }
+
       /* This should be a binary subdivision search or a hash for
        * matching the chunk name rather than a linear search.
        */
