@@ -2,6 +2,8 @@ IMAGE=cs412-libpng-fuzz
 LIBPNG_DIR=third_party/libpng-1.2.56
 PATCH=patches/libpng-nocrc.patch
 HARNESS=png_fuzz
+DOCKER_RUN=docker run --rm -v "$$(pwd)":/work
+DOCKER_RUN_TTY=docker run --rm -it -v "$$(pwd)":/work
 
 SEEDS=seeds
 DICT=dictionaries/png.dict
@@ -10,18 +12,22 @@ PLOT_OUTPUT=plot_output
 
 PATCH_SYNTHETIC=patches/synthetic-bug.patch
 
-.PHONY: build-docker patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu fuzz-qemu plot-qemu
+.PHONY: check-docker build-docker patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
 
-build-docker:
+check-docker:
+	@docker info >/dev/null
+
+build-docker: check-docker
 	docker build -t $(IMAGE) .
 
 patch-libpng:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
-		patch --forward -p0 < /work/$(PATCH) || true'
+		patch --forward -p0 < /work/$(PATCH) || \
+		patch --reverse --dry-run -p0 < /work/$(PATCH) >/dev/null'
 
 build-libpng:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		make distclean || true && \
 		CC=afl-clang-fast CXX=afl-clang-fast++ \
@@ -32,7 +38,7 @@ build-libpng:
 		make install'
 
 build-harness:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		afl-clang-fast /work/src/harness.c \
 		-I/work/build/install/include \
 		-L/work/build/install/lib \
@@ -45,19 +51,20 @@ build: build-docker patch-libpng build-libpng build-harness
 
 
 fuzz:
-	docker run --rm -it -v "$$(pwd)":/work $(IMAGE) bash -lc '\
-		afl-fuzz -i /work/$(SEEDS) \
+	$(DOCKER_RUN_TTY) $(IMAGE) bash -lc '\
+		AFL_SKIP_CPUFREQ=1 afl-fuzz -i /work/$(SEEDS) \
 		-o /work/$(FINDINGS) \
 		-x /work/$(DICT) \
 		-- /work/$(HARNESS) @@'
 
 patch-bug:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
-		patch --forward -p0 < /work/$(PATCH_SYNTHETIC) || true'
+		patch --forward -p0 < /work/$(PATCH_SYNTHETIC) || \
+		patch --reverse --dry-run -p0 < /work/$(PATCH_SYNTHETIC) >/dev/null'
 
 unpatch-bug:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		patch --reverse -p0 < /work/$(PATCH_SYNTHETIC) || true'
 
@@ -70,7 +77,7 @@ HARNESS_QEMU=png_fuzz_qemu
 FINDINGS_QEMU=findings-qemu
 
 build-libpng-vanilla:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		make distclean || true && \
 		CC=gcc CFLAGS="-g -O1" \
@@ -80,7 +87,7 @@ build-libpng-vanilla:
 
 
 build-harness-qemu:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		gcc /work/src/harness.c \
 		-I/work/$(VANILLA_INSTALL)/include \
 		-L/work/$(VANILLA_INSTALL)/lib \
@@ -90,16 +97,34 @@ build-harness-qemu:
 
 setup-qemu: build-docker patch-libpng build-libpng-vanilla build-harness-qemu
 
+smoke-qemu:
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
+		file /work/$(HARNESS_QEMU) && \
+		/work/$(HARNESS_QEMU) /work/$(SEEDS)/ct1n0g04.png'
+
 fuzz-qemu:
-	docker run --rm -it -v "$$(pwd)":/work $(IMAGE) bash -lc '\
-		afl-fuzz -Q \
+	$(DOCKER_RUN_TTY) $(IMAGE) bash -lc '\
+		test ! -e /work/$(FINDINGS_QEMU) || \
+		{ echo "Refusing to overwrite /work/$(FINDINGS_QEMU). Run make clean-qemu or make fuzz-qemu-resume."; exit 2; }; \
+		AFL_SKIP_CPUFREQ=1 afl-fuzz -Q \
 		-i /work/$(SEEDS) \
 		-o /work/$(FINDINGS_QEMU) \
 		-x /work/$(DICT) \
 		-- /work/$(HARNESS_QEMU) @@'
+
+fuzz-qemu-resume:
+	$(DOCKER_RUN_TTY) $(IMAGE) bash -lc '\
+		AFL_AUTORESUME=1 AFL_SKIP_CPUFREQ=1 afl-fuzz -Q \
+		-i /work/$(SEEDS) \
+		-o /work/$(FINDINGS_QEMU) \
+		-x /work/$(DICT) \
+		-- /work/$(HARNESS_QEMU) @@'
+
+clean-qemu:
+	rm -rf $(FINDINGS_QEMU) plot_output_qemu
 	
 plot-qemu:
-	docker run --rm -v "$$(pwd)":/work $(IMAGE) bash -lc '\
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		afl-plot /work/$(FINDINGS_QEMU)/default/ /work/plot_output_qemu/'
 
 clean:

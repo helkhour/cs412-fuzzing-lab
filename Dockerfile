@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     qemu-system \
     qemu-user \
+    meson \
     ninja-build \
     flex \
     bison \
@@ -44,6 +45,5 @@ RUN git clone https://github.com/AFLplusplus/AFLplusplus.git /opt/AFLplusplus &&
     make install
 
 WORKDIR /work
-
 
 
