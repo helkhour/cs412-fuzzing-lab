@@ -13,13 +13,13 @@ team4-cs412-fuzzing-libpng/
 ├── Dockerfile
 ├── Makefile
 ├── README.md
+├── report.tex
+├── report.pdf
 ├── src/                  # fuzzing harness source
 ├── seeds/                # input seed corpus
 ├── dictionaries/         # AFL++ PNG dictionary
 ├── patches/              # CRC removal patch + synthetic bug patch
 ├── third_party/          # libpng 1.2.56 source (downloaded, not committed)
-├── build/                # instrumented build output (generated)
-├── build-qemu/           # vanilla build output for QEMU mode (generated)
 ├── findings/             # AFL++ output — white-box campaign (generated)
 ├── findings-qemu/        # AFL++ output — QEMU campaign (generated)
 ├── plot_output/          # afl-plot graphs — white-box (generated)
