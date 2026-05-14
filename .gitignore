@@ -6,7 +6,6 @@
 /build*/
 
 # Fuzzer output directories. Commit only compact 40-minute evidence below.
-/findings*/
 !/findings-qemu-40m/
 !/findings-qemu-40m/default/
 !/findings-qemu-40m/default/cmdline
