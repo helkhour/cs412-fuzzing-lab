@@ -1,5 +1,7 @@
 IMAGE=cs412-libpng-fuzz
 LIBPNG_DIR=third_party/libpng-1.2.56
+LIBPNG_TARBALL=libpng-1.2.56.tar.gz
+LIBPNG_URL=https://download.sourceforge.net/libpng/$(LIBPNG_TARBALL)
 PATCH=patches/libpng-nocrc.patch
 HARNESS=png_fuzz
 DOCKER_RUN=docker run --rm -v "$$(pwd)":/work
@@ -12,7 +14,7 @@ PLOT_OUTPUT=plot_output
 
 PATCH_SYNTHETIC=patches/synthetic-bug.patch
 
-.PHONY: check-docker build-docker patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
+.PHONY: check-docker build-docker setup-libpng patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
 
 check-docker:
 	@docker info >/dev/null
@@ -20,7 +22,16 @@ check-docker:
 build-docker: check-docker
 	docker build -t $(IMAGE) .
 
-patch-libpng:
+setup-libpng: build-docker
+	$(DOCKER_RUN) $(IMAGE) bash -lc '\
+		mkdir -p /work/third_party && \
+		cd /work/third_party && \
+		test -d libpng-1.2.56 || { \
+			test -f $(LIBPNG_TARBALL) || wget -O $(LIBPNG_TARBALL) $(LIBPNG_URL); \
+			tar xf $(LIBPNG_TARBALL); \
+		}'
+
+patch-libpng: setup-libpng
 	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		patch --forward -p0 < /work/$(PATCH) || \
