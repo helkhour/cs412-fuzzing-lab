@@ -1,0 +1,6 @@
+# environment variables:
+AFL_CUSTOM_INFO_PROGRAM=/work/png_fuzz
+AFL_CUSTOM_INFO_PROGRAM_ARGV=@@
+AFL_CUSTOM_INFO_OUT=/work/findings/default
+# command line:
+'afl-fuzz' '-i' '/work/seeds' '-o' '/work/findings' '-x' '/opt/AFLplusplus/dictionaries/png.dict' '--' '/work/png_fuzz' '@@'

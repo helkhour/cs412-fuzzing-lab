@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Vendored/third-party source trees.
 /third_party/libpng-1.2.56/
 
@@ -27,3 +28,8 @@ core
 *.swp
 *.swo
 *~
+=======
+third_party/
+png_fuzz
+png_fuzz_qemu
+>>>>>>> 5e1057355d4b7f2d753f50cdd11257fbeb5d33a0
