@@ -12,13 +12,19 @@ PLOT_OUTPUT=plot_output
 
 PATCH_SYNTHETIC=patches/synthetic-bug.patch
 
-.PHONY: check-docker build-docker patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
+.PHONY: check-docker build-docker download-libpng patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
 
 check-docker:
 	@docker info >/dev/null
 
 build-docker: check-docker
 	docker build -t $(IMAGE) .
+
+download-libpng:
+	mkdir -p third_party && \
+	wget -O third_party/libpng-1.2.56.tar.gz \
+		https://download.sourceforge.net/libpng/libpng-1.2.56.tar.gz && \
+	tar xf third_party/libpng-1.2.56.tar.gz -C third_party/
 
 patch-libpng:
 	$(DOCKER_RUN) $(IMAGE) bash -lc '\
@@ -47,7 +53,7 @@ build-harness:
 		-o /work/$(HARNESS)'
 
 
-build: build-docker patch-libpng build-libpng build-harness
+build: build-docker download-libpng patch-libpng build-libpng build-harness
 
 
 fuzz:
