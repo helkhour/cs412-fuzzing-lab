@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     make \
     cmake \
     git \
+    gnuplot-nox \
     wget \
     curl \
     patch \
@@ -45,5 +46,4 @@ RUN git clone https://github.com/AFLplusplus/AFLplusplus.git /opt/AFLplusplus &&
     make install
 
 WORKDIR /work
-
 
