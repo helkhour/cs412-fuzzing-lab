@@ -1,0 +1,29 @@
+# Vendored/third-party source trees.
+/third_party/libpng-1.2.56/
+
+# Local build directories and install prefixes.
+/build*/
+
+# Fuzzer output directories.
+/findings*/
+/speed*/
+/q8-edges*/
+
+# AFL plot reports.
+/plot_output*/
+
+# Locally built fuzzing/test binaries.
+/png_fuzz
+/png_fuzz_*
+/pngtest_libpng_*
+
+# Generated test/output files.
+/pngout.png
+*.core
+core
+
+# Editor and OS noise.
+.DS_Store
+*.swp
+*.swo
+*~

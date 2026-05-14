@@ -6,7 +6,16 @@
 #define MAX_IMAGE_DIM 4096
 
 #ifndef __AFL_LOOP
-#define __AFL_LOOP(x) 1
+static int afl_loop_fallback(unsigned int max_iterations) {
+    static int once = 1;
+    (void)max_iterations;
+    if (!once) {
+        return 0;
+    }
+    once = 0;
+    return 1;
+}
+#define __AFL_LOOP(x) afl_loop_fallback(x)
 #endif
 
 static int fuzz_one(const char *filename) {
