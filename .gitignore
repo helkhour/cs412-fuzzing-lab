@@ -21,7 +21,6 @@
 /q8-screenshot*/
 
 # AFL plot reports. Commit only compact 40-minute graph outputs below.
-/plot_output*/
 !/plot_output_qemu_40m/
 !/plot_output_qemu_40m/index.html
 !/plot_output_qemu_40m/edges.png
