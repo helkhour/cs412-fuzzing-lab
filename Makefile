@@ -14,11 +14,8 @@ PLOT_OUTPUT=plot_output
 
 PATCH_SYNTHETIC=patches/synthetic-bug.patch
 
-<<<<<<< HEAD
-.PHONY: check-docker build-docker setup-libpng patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
-=======
-.PHONY: check-docker build-docker download-libpng patch-libpng build-libpng build-harness build fuzz plot clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
->>>>>>> bc20eb90cc85ff9f2295103ff4f48369146090fa
+
+.PHONY: check-docker build-docker download-libpng patch-libpng build-libpng build-harness build fuzz clean setup-qemu build-libpng-vanilla build-harness-qemu smoke-qemu fuzz-qemu fuzz-qemu-resume clean-qemu plot-qemu
 
 check-docker:
 	@docker info >/dev/null
@@ -26,18 +23,6 @@ check-docker:
 build-docker: check-docker
 	docker build -t $(IMAGE) .
 
-<<<<<<< HEAD
-setup-libpng: build-docker
-	$(DOCKER_RUN) $(IMAGE) bash -lc '\
-		mkdir -p /work/third_party && \
-		cd /work/third_party && \
-		test -d libpng-1.2.56 || { \
-			test -f $(LIBPNG_TARBALL) || wget -O $(LIBPNG_TARBALL) $(LIBPNG_URL); \
-			tar xf $(LIBPNG_TARBALL); \
-		}'
-
-patch-libpng: setup-libpng
-=======
 download-libpng:
 	mkdir -p third_party && \
 	wget -O third_party/libpng-1.2.56.tar.gz \
@@ -45,7 +30,6 @@ download-libpng:
 	tar xf third_party/libpng-1.2.56.tar.gz -C third_party/
 
 patch-libpng:
->>>>>>> bc20eb90cc85ff9f2295103ff4f48369146090fa
 	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		patch --forward -p0 < /work/$(PATCH) || \
@@ -92,8 +76,6 @@ unpatch-bug:
 	$(DOCKER_RUN) $(IMAGE) bash -lc '\
 		cd /work/$(LIBPNG_DIR) && \
 		patch --reverse -p0 < /work/$(PATCH_SYNTHETIC) || true'
-
-build-bug: build-docker patch-libpng patch-bug build-libpng build-harness
 
 
 # For QEMU mode, we need a copy of the libng compiled with standard complier (gcc) or plain clang, without asan or afl 
