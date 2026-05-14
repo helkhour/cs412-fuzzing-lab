@@ -1,17 +1,40 @@
-<<<<<<< HEAD
-# Vendored/third-party source trees.
-/third_party/libpng-1.2.56/
+# Vendored/third-party source trees; keep the source archive only.
+/third_party/*
+!/third_party/libpng-1.2.56.tar.gz
 
 # Local build directories and install prefixes.
 /build*/
 
-# Fuzzer output directories.
+# Fuzzer output directories. Commit only compact 40-minute evidence below.
 /findings*/
+!/findings-qemu-40m/
+!/findings-qemu-40m/default/
+!/findings-qemu-40m/default/cmdline
+!/findings-qemu-40m/default/fuzzer_stats
+!/findings-qemu-40m/default/plot_data
+!/findings-whitebox-40m/
+!/findings-whitebox-40m/default/
+!/findings-whitebox-40m/default/cmdline
+!/findings-whitebox-40m/default/fuzzer_stats
+!/findings-whitebox-40m/default/plot_data
 /speed*/
 /q8-edges*/
+/q8-screenshot*/
 
-# AFL plot reports.
+# AFL plot reports. Commit only compact 40-minute graph outputs below.
 /plot_output*/
+!/plot_output_qemu_40m/
+!/plot_output_qemu_40m/index.html
+!/plot_output_qemu_40m/edges.png
+!/plot_output_qemu_40m/exec_speed.png
+!/plot_output_qemu_40m/high_freq.png
+!/plot_output_qemu_40m/low_freq.png
+!/plot_output_whitebox_40m/
+!/plot_output_whitebox_40m/index.html
+!/plot_output_whitebox_40m/edges.png
+!/plot_output_whitebox_40m/exec_speed.png
+!/plot_output_whitebox_40m/high_freq.png
+!/plot_output_whitebox_40m/low_freq.png
 
 # Locally built fuzzing/test binaries.
 /png_fuzz
@@ -28,8 +51,3 @@ core
 *.swp
 *.swo
 *~
-=======
-third_party/
-png_fuzz
-png_fuzz_qemu
->>>>>>> 5e1057355d4b7f2d753f50cdd11257fbeb5d33a0
