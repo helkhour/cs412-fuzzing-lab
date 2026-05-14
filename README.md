@@ -36,6 +36,27 @@ team4-cs412-fuzzing-libpng/
 
 ---
 
+## Recommended Build Command
+
+For the normal white-box campaign, the complete target can be built with:
+
+```bash
+make build
+```
+
+This command performs Steps 1 to 5 automatically:
+
+1. builds the Docker image;
+2. downloads and extracts libpng 1.2.56;
+3. applies the CRC-removal patch;
+4. builds the instrumented libpng library with AFL++ and ASan;
+5. builds the fuzzing harness `png_fuzz`.
+
+The sections below describe the same build process in detail
+
+
+---
+
 ## Step 1 — Build the Docker Image
 
 ```bash
